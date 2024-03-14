@@ -21,6 +21,7 @@ class star:
         self.x = x
         self.y = y
         self.b = b
+        self.n = 1
     def __str__(self):
         return f"(x = {self.x},y = {self.y},b = {self.b})"
     def dist(self, star2):
@@ -31,12 +32,12 @@ class star:
 #the list that is going to hold the stars
 stararr = list()
 Aroi = 9
-Ithresh = 90
+Ithresh = 120
 
 def centroid():
     offset = int((Aroi-1)/2)
-    for i in range(offset,height-offset+1):
-        for j in range(offset, width - offset +1):
+    for i in range(offset,height-offset):
+        for j in range(offset, width - offset):
             if pixels[i][j] > Ithresh:
                 temp = [pixels[k][j-offset : j+offset+1] for k in range(i-offset,i+offset+1)]
                 #print(f"{len(temp)} at {i} , {j} with brightness {temp[offset][offset]}")
@@ -67,13 +68,14 @@ def centroid():
                 flag = 0
                 for star1 in stararr:
                     if stemp.dist(star1) < Aroi:
-                        star1.x = star1.x*star1.b + stemp.x*stemp.b
-                        star1.y = star1.y*star1.b + stemp.y*stemp.b
-                        star1.b = star1.b + stemp.b
+                        star1.x = star1.x*star1.b*star1.n + stemp.x*stemp.b
+                        star1.y = star1.y*star1.b *star1.n + stemp.y*stemp.b
+                        star1.b = star1.b*star1.n + stemp.b
                         star1.x /= star1.b
                         star1.y /= star1.b
-                        star1.b /= 2
+                        star1.b /= 1+star1.n
                         flag = 1
+                        star1.n += 1
                         break
                 if flag ==0:
                     stararr.append(stemp)
@@ -115,5 +117,5 @@ for i in stararr:
     color = (255,0,0)
     thickness = 2
     image = cv2.circle(image, center_coord,rad,color,thickness)
-cv2.imwrite("orion_circled.jpg",image)
+cv2.imwrite("orion_new_circled.jpg",image)
 
