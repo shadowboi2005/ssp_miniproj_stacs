@@ -4,8 +4,10 @@ import sys
 from math import pow,sqrt
 import matplotlib.pyplot as plt
 import cv2
+import csv
 
-addr_to_pic = "/home/imnothackr/SSP_miniproj/images/orionc.png"
+
+addr_to_pic = "images/image_2.jpg"
 image = Image.open(addr_to_pic)
 bw = image.convert(mode="L")
 
@@ -31,8 +33,8 @@ class star:
 
 #the list that is going to hold the stars
 stararr = list()
-Aroi = 9
-Ithresh = 120
+Aroi = 11
+Ithresh = 3
 
 def centroid():
     offset = int((Aroi-1)/2)
@@ -88,10 +90,21 @@ ax = []
 ay = []
 size = []
 for i in stararr:
-    print(i)
+    #print(i)
     ax.append(i.x)
     ay.append(height - i.y)
-    size.append(i.b/30)
+    size.append(i.b)
+
+with open('img2.csv', 'w',newline="") as csvfile1:
+    writer = csv.writer(csvfile1)
+    writer.writerow(['x coord' , 'y coord' , 'brightness'])
+    for i in stararr:
+        writer.writerow([f'{i.x + 1}' , f'{i.y+1}',f'{i.b}'])
+    csvfile1.close()
+
+
+
+#plotting the graph    
 fig, axis = plt.subplots()
 axis.scatter(ax,ay,s = size)
 axis.set(xlim = (0,width) , ylim = (0,height))
@@ -111,11 +124,12 @@ print("jobdone")
 image = cv2.imread(addr_to_pic)
 window_name = 'image'
 
+#drawing the circles
 for i in stararr:
     center_coord = (round(i.x),round(i.y))
     rad = int((Aroi+1)/2)
     color = (255,0,0)
     thickness = 2
     image = cv2.circle(image, center_coord,rad,color,thickness)
-cv2.imwrite("orion_new_circled.jpg",image)
+cv2.imwrite("image_2_new_circled.jpg",image)
 

@@ -1,0 +1,10 @@
+date: march 14
+	image1:
+		code showing weird behaviour around the edges[chk img1]
+		have to find a more efficient way to read and compare data
+		lower brightness values are trash values
+	image2:
+		changes made: increased Aroi and threshold to eliminate some trash values.
+		observation:
+			lesser amount of trash values. seems like a problem with the threshhold.
+			
