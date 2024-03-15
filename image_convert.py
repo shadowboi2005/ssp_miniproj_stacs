@@ -7,7 +7,7 @@ import cv2
 import csv
 
 
-addr_to_pic = "images/image_2.jpg"
+addr_to_pic = "images/image_9.jpg"
 image = Image.open(addr_to_pic)
 bw = image.convert(mode="L")
 
@@ -34,7 +34,7 @@ class star:
 #the list that is going to hold the stars
 stararr = list()
 Aroi = 11
-Ithresh = 3
+Ithresh = 5
 
 def centroid():
     offset = int((Aroi-1)/2)
@@ -56,13 +56,15 @@ def centroid():
                 xtemp= 0 
                 ytemp = 0
                 btemp = 0
+                b2temp = 0
                 for m in range(0,Aroi):
                     for n in range(0,Aroi):
-                        xtemp +=  (i-offset+m)*temp[m][n]
-                        ytemp += (j - offset + n)*temp[m][n]
+                        xtemp +=  (i-offset+m)*temp[m][n]*temp[m][n]
+                        ytemp += (j - offset + n)*temp[m][n]*temp[m][n]
                         btemp += temp[m][n]
-                xtemp = xtemp/btemp
-                ytemp = ytemp/btemp
+                        b2temp += temp[m][n]*temp[m][n]
+                xtemp = xtemp/b2temp
+                ytemp = ytemp/b2temp
                 btemp = btemp/(Aroi * Aroi)
                 stemp = star(ytemp,xtemp,btemp)
                 #print(f"{stemp} , {i} , {j} ")
@@ -70,11 +72,11 @@ def centroid():
                 flag = 0
                 for star1 in stararr:
                     if stemp.dist(star1) < Aroi:
-                        star1.x = star1.x*star1.b*star1.n + stemp.x*stemp.b
-                        star1.y = star1.y*star1.b *star1.n + stemp.y*stemp.b
+                        star1.x = star1.x*star1.b*star1.b*star1.n + stemp.x*stemp.b*stemp.b
+                        star1.y = star1.y*star1.b*star1.b*star1.n + stemp.y*stemp.b*stemp.b
+                        star1.x /= star1.b*star1.b*star1.n + stemp.b*stemp.b
+                        star1.y /= star1.b*star1.b*star1.n + stemp.b*stemp.b
                         star1.b = star1.b*star1.n + stemp.b
-                        star1.x /= star1.b
-                        star1.y /= star1.b
                         star1.b /= 1+star1.n
                         flag = 1
                         star1.n += 1
@@ -95,7 +97,9 @@ for i in stararr:
     ay.append(height - i.y)
     size.append(i.b)
 
-with open('img2.csv', 'w',newline="") as csvfile1:
+stararr.sort(key=lambda i: i.b , reverse=True)
+
+with open('img9_quad.csv', 'w',newline="") as csvfile1:
     writer = csv.writer(csvfile1)
     writer.writerow(['x coord' , 'y coord' , 'brightness'])
     for i in stararr:
@@ -124,6 +128,8 @@ print("jobdone")
 image = cv2.imread(addr_to_pic)
 window_name = 'image'
 
+
+
 #drawing the circles
 for i in stararr:
     center_coord = (round(i.x),round(i.y))
@@ -131,5 +137,5 @@ for i in stararr:
     color = (255,0,0)
     thickness = 2
     image = cv2.circle(image, center_coord,rad,color,thickness)
-cv2.imwrite("image_2_new_circled.jpg",image)
+cv2.imwrite("img9_new.jpg",image)
 
