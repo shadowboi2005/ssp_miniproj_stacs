@@ -1,13 +1,19 @@
 from PIL import Image
 import numpy
 import sys
-from math import pow,sqrt
+from math import pow,sqrt,acos,pi
 import matplotlib.pyplot as plt
 import cv2
 import csv
 
+constl = 'canismajor'
+stararr = list()
+Aroi = 11
+Ithresh =4
 
-addr_to_pic = "images/image_9.jpg"
+number = sys.argv[1]
+
+addr_to_pic = "./sm_imgs/"+constl+"/image_"+str(number)+".png"
 image = Image.open(addr_to_pic)
 bw = image.convert(mode="L")
 
@@ -17,7 +23,7 @@ width, height = bw.size
 pixels = [pixels[i * width:(i + 1) * width] for i in range(height)]
 orig = sys.stdout
 
-#define datatype star
+#define datatype starstars
 class star:
     def __init__(self,x,y,b):
         self.x = x
@@ -32,9 +38,6 @@ class star:
 
 
 #the list that is going to hold the stars
-stararr = list()
-Aroi = 11
-Ithresh = 5
 
 def centroid():
     offset = int((Aroi-1)/2)
@@ -99,20 +102,24 @@ for i in stararr:
 
 stararr.sort(key=lambda i: i.b , reverse=True)
 
-with open('img9_quad.csv', 'w',newline="") as csvfile1:
+with open(constl+'.csv', 'w',newline="") as csvfile1:
     writer = csv.writer(csvfile1)
     writer.writerow(['x coord' , 'y coord' , 'brightness'])
     for i in stararr:
         writer.writerow([f'{i.x + 1}' , f'{i.y+1}',f'{i.b}'])
     csvfile1.close()
 
+#plotting the graph 
+'''
 
-
-#plotting the graph    
 fig, axis = plt.subplots()
 axis.scatter(ax,ay,s = size)
 axis.set(xlim = (0,width) , ylim = (0,height))
 plt.show()
+
+
+'''
+
 
 #sending image to a file
 sys.stdout = open("fname" , 'w')
@@ -137,5 +144,48 @@ for i in stararr:
     color = (255,0,0)
     thickness = 2
     image = cv2.circle(image, center_coord,rad,color,thickness)
-cv2.imwrite("img9_new.jpg",image)
+cv2.imwrite("img11_new.jpg",image)
+
+
+
+#constellation detection
+
+
+angdev = 0.2 #change in angle allowed
+
+
+constln = {'canismajor':0,'orion':0,'hydra':0,'puppis':0,'perseus':0}
+anglerep = list()
+with open('anglerep.csv', 'r',newline="") as csvfile1:
+    reader = csv.reader(csvfile1)
+    for row in reader:
+        anglerep.append([float(row[0]),float(row[1]),float(row[2]),row[3]])
+    csvfile1.close()
+
+def angles(star1,star2,star3):
+    a = star1.dist(star2)
+    b = star2.dist(star3)
+    c = star3.dist(star1)
+    A = (a*a + c*c - b*b)/(2*a*c)
+    B = (a*a + b*b - c*c)/(2*a*b)
+    C = (b*b + c*c - a*a)/(2*b*c)
+    A= 180*acos(A)/pi
+    B= 180*acos(B)/pi
+    C= 180*acos(C)/pi
+    return [A,B,C]
+
+for i in stararr:
+    for j in stararr:   
+        for k in stararr:
+            if i!=j and j!=k and i!=k:
+                for ang in anglerep:
+                    angmes = angles(i,j,k)
+                    if (abs(ang[0] - angmes[0]) < angdev)and (abs(ang[1] - angmes[1]) < angdev) and (abs(ang[2] - angmes[2]) < angdev):
+                        constln[ang[3]] += 1    
+                    
+max_key = max(constln, key=constln.get)
+if constln[max_key] > 0:
+    print("constellation detected", max_key, "with", constln[max_key], "triangles spotted")
+else:
+    print("no constellation detected")
 
