@@ -6,10 +6,11 @@ import matplotlib.pyplot as plt
 import cv2
 import csv
 
-constl = 'canismajor'
+constl = 'hydra'
 stararr = list()
 Aroi = 11
-Ithresh =4
+Ithresh =5
+angdev = 0.1 #change in angle allowed for constellation detection
 
 number = sys.argv[1]
 
@@ -22,6 +23,8 @@ pixels = list(bw.getdata())
 width, height = bw.size
 pixels = [pixels[i * width:(i + 1) * width] for i in range(height)]
 orig = sys.stdout
+pixels = numpy.array(pixels)
+numpy.pad(pixels,pad_width=Aroi,mode='constant',constant_values=0)
 
 #define datatype starstars
 class star:
@@ -46,16 +49,6 @@ def centroid():
             if pixels[i][j] > Ithresh:
                 temp = [pixels[k][j-offset : j+offset+1] for k in range(i-offset,i+offset+1)]
                 #print(f"{len(temp)} at {i} , {j} with brightness {temp[offset][offset]}")
-                '''
-                Ibound = 0
-                for k in range(0,Aroi):
-                    Ibound += (temp[0][k] + temp[k][0]+temp[Aroi-1][k]+ temp[k][Aroi-1])
-                Ibound -= (temp[0][0]+ temp[Aroi-1][0] + temp[Aroi-1][Aroi-1] + temp[0][Aroi -1])
-                Ibound /= (4*(Aroi-1))
-                for m in range(0,Aroi):
-                    for n in range(0,Aroi):
-                        temp[m][n] -= Ibound
-                '''
                 xtemp= 0 
                 ytemp = 0
                 btemp = 0
@@ -69,7 +62,7 @@ def centroid():
                 xtemp = xtemp/b2temp
                 ytemp = ytemp/b2temp
                 btemp = btemp/(Aroi * Aroi)
-                stemp = star(ytemp,xtemp,btemp)
+                stemp = star(ytemp-Aroi,xtemp-Aroi,btemp)
                 #print(f"{stemp} , {i} , {j} ")
 
                 flag = 0
@@ -110,7 +103,7 @@ with open(constl+'.csv', 'w',newline="") as csvfile1:
     csvfile1.close()
 
 #plotting the graph 
-'''
+
 
 fig, axis = plt.subplots()
 axis.scatter(ax,ay,s = size)
@@ -118,7 +111,7 @@ axis.set(xlim = (0,width) , ylim = (0,height))
 plt.show()
 
 
-'''
+
 
 
 #sending image to a file
@@ -151,15 +144,12 @@ cv2.imwrite("img11_new.jpg",image)
 #constellation detection
 
 
-angdev = 0.2 #change in angle allowed
-
-
 constln = {'canismajor':0,'orion':0,'hydra':0,'puppis':0,'perseus':0}
 anglerep = list()
-with open('anglerep.csv', 'r',newline="") as csvfile1:
+with open('trial.csv', 'r',newline="") as csvfile1:
     reader = csv.reader(csvfile1)
     for row in reader:
-        anglerep.append([float(row[0]),float(row[1]),float(row[2]),row[3]])
+        anglerep.append([float(row[0]),float(row[1]),float(row[2]),"hydra"])
     csvfile1.close()
 
 def angles(star1,star2,star3):
