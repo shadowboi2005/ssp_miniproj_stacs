@@ -6,11 +6,11 @@ import matplotlib.pyplot as plt
 import cv2
 import csv
 
-constl = 'hydra'
+constl = 'canismajor'
 stararr = list()
 Aroi = 11
-Ithresh =5
-angdev = 0.1 #change in angle allowed for constellation detection
+Ithresh = 3
+angdev = 0.3 #change in angle allowed for constellation detection
 
 number = sys.argv[1]
 
@@ -24,7 +24,7 @@ width, height = bw.size
 pixels = [pixels[i * width:(i + 1) * width] for i in range(height)]
 orig = sys.stdout
 pixels = numpy.array(pixels)
-numpy.pad(pixels,pad_width=Aroi,mode='constant',constant_values=0)
+
 
 #define datatype starstars
 class star:
@@ -62,7 +62,7 @@ def centroid():
                 xtemp = xtemp/b2temp
                 ytemp = ytemp/b2temp
                 btemp = btemp/(Aroi * Aroi)
-                stemp = star(ytemp-Aroi,xtemp-Aroi,btemp)
+                stemp = star(ytemp,xtemp,btemp)
                 #print(f"{stemp} , {i} , {j} ")
 
                 flag = 0
@@ -146,10 +146,10 @@ cv2.imwrite("img11_new.jpg",image)
 
 constln = {'canismajor':0,'orion':0,'hydra':0,'puppis':0,'perseus':0}
 anglerep = list()
-with open('trial.csv', 'r',newline="") as csvfile1:
+with open('anglerep.csv', 'r',newline="") as csvfile1:
     reader = csv.reader(csvfile1)
     for row in reader:
-        anglerep.append([float(row[0]),float(row[1]),float(row[2]),"hydra"])
+        anglerep.append([float(row[0]),float(row[1]),float(row[2]),row[3]])
     csvfile1.close()
 
 def angles(star1,star2,star3):
@@ -167,11 +167,12 @@ def angles(star1,star2,star3):
 for i in stararr:
     for j in stararr:   
         for k in stararr:
-            if i!=j and j!=k and i!=k:
+            if i!=j and j!=k and i!=k and i.dist(j)<=j.dist(k) and j.dist(k)<=i.dist(k):
                 for ang in anglerep:
-                    angmes = angles(i,j,k)
+                    angmes = sorted(angles(i,j,k))
                     if (abs(ang[0] - angmes[0]) < angdev)and (abs(ang[1] - angmes[1]) < angdev) and (abs(ang[2] - angmes[2]) < angdev):
-                        constln[ang[3]] += 1    
+                        constln[ang[3]] += 1
+                        print(ang)
                     
 max_key = max(constln, key=constln.get)
 if constln[max_key] > 0:

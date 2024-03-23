@@ -12,7 +12,7 @@ def calculate_angles(a, b, c):
 
     return angle_A, angle_B, angle_C
 
-constl = 'orion'
+constl = 'hydra'
 
 k = []
 with open('./constls/'+constl+'_triangles_len', 'r', newline='') as csvfile1:
@@ -24,6 +24,7 @@ with open('./constls/'+constl+'_triangles_len', 'r', newline='') as csvfile1:
 with open('anglerep.csv','+a',newline="") as csvfile1:
     writer = csv.writer(csvfile1)
     for i in k:
+        i.append(constl)
         writer.writerow(i)
     csvfile1.close()
 
